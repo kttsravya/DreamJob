@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:security="http://www.springframework.org/schema/security"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+						http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+						http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-4.2.xsd">
+	
+	<!-- Root Context: defines shared resources visible to all other web components -->
+	
+	<context:component-scan base-package="com.project.dreamjob">
+		 <context:exclude-filter type="regex"  expression="com.project.dreamjob.controllers"/>
+		 <context:exclude-filter type="regex"  expression="com.project.dreamjob.restcontrollers"/>
+	</context:component-scan>  
+	
+	<!--  this is for jdbc connection -->
+	
+	<bean id="dataSource"
+      class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="${jdbc.driverClassName}" />
+        <property name="url" value="${jdbc.url}" />
+        <property name="username" value="${jdbc.username}" />
+        <property name="password" value="${jdbc.password}" />
+    </bean>
+    
+     <bean id="dataSource1" class="org.apache.commons.dbcp.BasicDataSource">
+		<property name="driverClassName" value="${jdbc.driverClassName}" />
+		<property name="url" value="${jdbc.url}" />
+		<property name="username" value="${jdbc.username}" />
+		<property name="password" value="${jdbc.password}" />
+		<property name="initialSize" value="2" />
+		<property name="maxActive" value="5" />
+	</bean>  
+	
+	<!--  <context:property-placeholder location="classpath:jdbc.properties" />
+	 <context:property-placeholder location="classpath:globalValues.properties" /> -->
+	 
+	 <context:property-placeholder
+			location="classpath:jdbc.properties,
+          			  classpath:globalValues.properties"
+											ignore-unresolvable="true"/>
+	 
+	<!--  this is for hibernate session -->
+	 
+	 <bean id="sessionFactory"
+		class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+		<property name="dataSource" ref="dataSource1" />
+		<property name="packagesToScan" value="com.project.dreamjob.domain" />
+		<property name="annotatedClasses">
+    		<list>
+        		<value>com.project.dreamjob.domain.JobPosting</value>
+        		<value>com.project.dreamjob.domain.JobSeekerSignUp</value>
+        		<value>com.project.dreamjob.domain.JobSeekerProfile</value>
+        		<value>com.project.dreamjob.domain.RecruiterSignUp</value>
+        		<value>com.project.dreamjob.domain.JobSeekerDocument</value>
+    		</list>
+		</property>
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.dialect">org.hibernate.dialect.MySQL5Dialect</prop>
+				<prop key="hibernate.show_sql">true</prop>
+				<prop key="hibernate.format_sql">true</prop>
+				<!-- <prop key="hibernate.hbm2ddl.auto">create</prop>  -->
+			</props>
+		</property>
+		
+	</bean>
+	
+	<!-- this is for hibernate transactions -->
+	
+	<bean id="transactionManager"
+		class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+	
+	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+        <property name="host" value="smtp.gmail.com" />
+        <property name="port" value="587" />
+        <property name="username" value="sravya.katta9@gmail.com" />
+        <property name="password" value="SweetMom9" />
+        <property name="javaMailProperties">
+            <props>
+                <prop key="mail.transport.protocol">smtp</prop>
+                <prop key="mail.smtp.auth">true</prop>
+                <prop key="mail.smtp.starttls.enable">true</prop>
+            </props>
+        </property>
+    </bean>
+    
+    <bean id="restTemplate" class="org.springframework.web.client.RestTemplate">
+    </bean>
+    
+    <bean id="preConfiguredMessage" class="org.springframework.mail.SimpleMailMessage">
+        <property name="to" value="somebody@gmail.com"></property> 
+        <property name="from" value="sravya.katta9@gmail.com"></property>
+        <property name="subject" value="HI, we like your work, if you are interested in our company, lets schedule interview"/>
+    </bean>
+	
+	
+	
+	
+	
+	<!-- keep the following commented code here only -->
+	
+	<!-- Password Hashing Bean -->
+   <!--  <bean id="passwordEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder" >
+            <constructor-arg name="strength" value="12" />
+    </bean> -->
+    
+    
+    
+   <!--  <security:authentication-manager>
+        <security:authentication-provider>
+            <security:jdbc-user-service data-source-ref="dataSource1"  
+                users-by-username-query="select name, password, enabled from recruiter_signup where email = ?" />
+           authorities-by-username-query="select u.user_name, ur.authority from users u, user_roles ur where u.user_id = ur.user_id and u.user_name = ?" 
+             
+            <security:password-encoder ref="passwordEncoder" />
+        </security:authentication-provider>
+    </security:authentication-manager> -->
+    
+  
+</beans>
